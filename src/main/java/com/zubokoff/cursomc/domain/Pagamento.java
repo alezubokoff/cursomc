@@ -2,14 +2,28 @@ package com.zubokoff.cursomc.domain;
 
 import java.io.Serializable;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
+
 import com.zubokoff.cursomc.domain.enums.EstadoPagamento;
 
-public class Pagamento implements Serializable {
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Pagamento implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Id
 	private Integer id;
-	private EstadoPagamento estadopagamento;
+	private Integer estadopagamento;
 	
+	@OneToOne
+	@JoinColumn(name = "pedido_id")
+	@MapsId
 	private Pedido pedido;
 	
 	public Pagamento() {
@@ -18,7 +32,7 @@ public class Pagamento implements Serializable {
 	public Pagamento(Integer id, EstadoPagamento estadopagamento, Pedido pedido) {
 		super();
 		this.id = id;
-		this.estadopagamento = estadopagamento;
+		this.estadopagamento = estadopagamento.getCod();
 		this.pedido = pedido;
 	}
 
@@ -31,11 +45,11 @@ public class Pagamento implements Serializable {
 	}
 
 	public EstadoPagamento getEstadopagamento() {
-		return estadopagamento;
+		return EstadoPagamento.toEnum(estadopagamento);
 	}
 
 	public void setEstadopagamento(EstadoPagamento estadopagamento) {
-		this.estadopagamento = estadopagamento;
+		this.estadopagamento = estadopagamento.getCod();
 	}
 
 	public Pedido getPedido() {
