@@ -18,7 +18,7 @@ public class ClienteResource {
 	private ClienteService service;
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> listar(@PathVariable Integer id) {
+	public ResponseEntity<Cliente> listar(@PathVariable Integer id) {
 		Cliente categoria = service.find(id); 
 		return ResponseEntity.ok().body(categoria);
 	}
