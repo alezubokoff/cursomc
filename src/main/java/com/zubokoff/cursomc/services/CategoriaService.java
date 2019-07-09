@@ -2,6 +2,7 @@ package com.zubokoff.cursomc.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.ObjDoubleConsumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.zubokoff.cursomc.domain.Categoria;
+import com.zubokoff.cursomc.dto.CategoriaDTO;
 import com.zubokoff.cursomc.repositories.CategoriaRepository;
 import com.zubokoff.cursomc.services.exceptions.DataIntegrityException;
 import com.zubokoff.cursomc.services.exceptions.ObjectNotFoundException;
@@ -53,5 +55,9 @@ public class CategoriaService {
 	public Page<Categoria> findPage(Integer page, Integer size, String direction, String properties) {
 		PageRequest pageRequest = PageRequest.of(page, size, Direction.valueOf(direction), properties);
 		return repo.findAll(pageRequest);
+	}
+	
+	public Categoria fromDTO(CategoriaDTO categoriaDTO) {
+		return new Categoria(categoriaDTO.getId(), categoriaDTO.getNome());
 	}
 }
