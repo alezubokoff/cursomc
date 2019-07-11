@@ -3,6 +3,8 @@ package com.zubokoff.cursomc.resources;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +30,15 @@ public class ClienteResource {
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<Cliente> listar(@PathVariable Integer id) {
-		Cliente categoria = service.find(id); 
-		return ResponseEntity.ok().body(categoria);
+		Cliente cliente = service.find(id); 
+		return ResponseEntity.ok().body(cliente);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Void> update(@RequestBody Cliente categoria, @PathVariable Integer id) {
-		categoria.setId(id);
-		categoria = service.update(categoria);
+	public ResponseEntity<Void> update(@Valid @RequestBody ClienteDTO objDTO, @PathVariable Integer id) {		
+		Cliente obj = service.fromDTO(objDTO);
+		obj.setId(id);
+		obj = service.update(obj);
 		return ResponseEntity.noContent().build();
 	}
 	
@@ -47,8 +50,8 @@ public class ClienteResource {
 	
 	@GetMapping
 	public ResponseEntity<List<ClienteDTO>> findAll() {
-		List<Cliente> categorias = service.findAll();
-		List<ClienteDTO> listDTO = categorias.stream().map(obj -> new ClienteDTO(obj)).collect(Collectors.toList());
+		List<Cliente> clientes = service.findAll();
+		List<ClienteDTO> listDTO = clientes.stream().map(obj -> new ClienteDTO(obj)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDTO);
 	}
 	
@@ -58,8 +61,8 @@ public class ClienteResource {
 			@RequestParam(value = "size", defaultValue = "24") Integer size,
 			@RequestParam(value = "direction", defaultValue = "ASC") String direction, 
 			@RequestParam(value = "properties", defaultValue = "nome") String properties) {
-		Page<Cliente> categorias = service.findPage(page, size, direction, properties);
-		Page<ClienteDTO> listDTO = categorias.map(obj -> new ClienteDTO(obj));
+		Page<Cliente> clientes = service.findPage(page, size, direction, properties);
+		Page<ClienteDTO> listDTO = clientes.map(obj -> new ClienteDTO(obj));
 		return ResponseEntity.ok().body(listDTO);
 	}
 }

@@ -23,8 +23,8 @@ public class ClienteService {
 	private ClienteRepository repo;
 
 	public Cliente find(Integer id) {
-		Optional<Cliente> cliente = repo.findById(id);
-		return cliente.orElseThrow(() -> new ObjectNotFoundException(
+		Optional<Cliente> obj = repo.findById(id);
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", tipo: " + Cliente.class.getName()));
 	}
 	
@@ -32,9 +32,11 @@ public class ClienteService {
 		return repo.findAll();
 	}
 
-	public Cliente update(Cliente cliente) {
-		this.find(cliente.getId());
-		return repo.save(cliente);
+	public Cliente update(Cliente obj) {
+		Cliente newObj = find(obj.getId());
+		updateData(newObj, obj);
+		this.find(obj.getId());
+		return repo.save(newObj);
 	}
 
 	public void delete(Integer id) {
@@ -42,7 +44,7 @@ public class ClienteService {
 			this.find(id);
 			repo.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
-			throw new DataIntegrityException("Não é possivel excluir uma cliente que possui produtos");
+			throw new DataIntegrityException("Não é possivel excluir porque há entidades relacionadas");
 		}
 	}
 	
@@ -51,7 +53,12 @@ public class ClienteService {
 		return repo.findAll(pageRequest);
 	}
 	
-	public Cliente fromDTO(ClienteDTO clienteDTO) {
-		throw new UnsupportedOperationException();
+	public Cliente fromDTO(ClienteDTO objDTO) {
+		return new Cliente(objDTO.getId(), objDTO.getNome(), objDTO.getEmail(), null, null);
+	}
+	
+	private void updateData(Cliente newObj, Cliente obj) {
+		newObj.setNome(obj.getNome());
+		newObj.setEmail(obj.getEmail());
 	}
 }
