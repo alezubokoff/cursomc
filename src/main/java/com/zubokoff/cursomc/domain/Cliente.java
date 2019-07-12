@@ -27,7 +27,6 @@ public class Cliente {
 	private String CpfCnpj;
 	private Integer tipo;
 	
-	
 	@OneToMany(mappedBy = "cliente")
 	private List<Endereco> enderecos = new ArrayList<>();
 	

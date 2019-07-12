@@ -9,10 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.zubokoff.cursomc.domain.Cidade;
 import com.zubokoff.cursomc.domain.Cliente;
+import com.zubokoff.cursomc.domain.Endereco;
+import com.zubokoff.cursomc.domain.enums.TipoCliente;
 import com.zubokoff.cursomc.dto.ClienteDTO;
+import com.zubokoff.cursomc.dto.ClienteNewDTO;
+import com.zubokoff.cursomc.repositories.CidadeRepository;
 import com.zubokoff.cursomc.repositories.ClienteRepository;
+import com.zubokoff.cursomc.repositories.EnderecoRepository;
 import com.zubokoff.cursomc.services.exceptions.DataIntegrityException;
 import com.zubokoff.cursomc.services.exceptions.ObjectNotFoundException;
 
@@ -22,12 +29,26 @@ public class ClienteService {
 	@Autowired
 	private ClienteRepository repo;
 
+	@Autowired
+	private CidadeRepository cidadeRepository;
+	
+	@Autowired
+	private EnderecoRepository enderecoRepository;
+
 	public Cliente find(Integer id) {
 		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", tipo: " + Cliente.class.getName()));
 	}
-	
+
+	@Transactional
+	public Cliente insert(Cliente obj) {
+		obj.setId(null);
+		obj = repo.save(obj);
+		enderecoRepository.saveAll(obj.getEnderecos());
+		return obj;
+	}
+
 	public List<Cliente> findAll() {
 		return repo.findAll();
 	}
@@ -47,16 +68,32 @@ public class ClienteService {
 			throw new DataIntegrityException("Não é possivel excluir porque há entidades relacionadas");
 		}
 	}
-	
+
 	public Page<Cliente> findPage(Integer page, Integer size, String direction, String properties) {
 		PageRequest pageRequest = PageRequest.of(page, size, Direction.valueOf(direction), properties);
 		return repo.findAll(pageRequest);
 	}
-	
-	public Cliente fromDTO(ClienteDTO objDTO) {
-		return new Cliente(objDTO.getId(), objDTO.getNome(), objDTO.getEmail(), null, null);
+
+	public Cliente fromDTO(ClienteDTO objDto) {
+		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
 	}
-	
+
+	public Cliente fromDTO(ClienteNewDTO objDto) {
+		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfCnpj(),
+				TipoCliente.toEnum(objDto.getTipo()));
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(),
+				objDto.getBairro(), objDto.getCep(), cli, cid);
+		cli.getEnderecos().add(end);
+		cli.getTelefones().add(objDto.getTelefone1());
+		if (objDto.getTelefone2() != null)
+			cli.getTelefones().add(objDto.getTelefone2());
+		if (objDto.getTelefone3() != null)
+			cli.getTelefones().add(objDto.getTelefone3());
+		
+		return cli;
+	}
+
 	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
