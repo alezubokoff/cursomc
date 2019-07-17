@@ -37,7 +37,6 @@ public class ResourceExceptionHundle {
 		for (FieldError x : e.getBindingResult().getFieldErrors()) {
 			error.addError(x.getField(), x.getDefaultMessage());
 		}
-
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(error);
 	}
 }
